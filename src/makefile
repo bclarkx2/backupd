@@ -2,6 +2,7 @@
 ##### Settings #####
 CC=gcc
 CFLAGS=-I .
+OUT=../out
 
 
 ##### Objects #####
@@ -29,13 +30,14 @@ all: $(OBJ)
 %: %.c
 	$(call compiling_msg,$<)
 	@mkdir -p $(DEP_DIR)
-	$(CC) -MD -MP -MF "$(DEP_DIR)/$@.d" -o "$@" "$<" $(CFLAGS)
+	@mkdir -p $(OUT)
+	$(CC) -MD -MP -MF "$(DEP_DIR)/$@.d" -o "$(OUT)/$@" "$<" $(CFLAGS)
 	@echo
 
 clean:
 	$(call redecho,"cleaning\n")
-	rm -rf $(DEP_DIR)
-	rm -f $(OBJ)
+	rm -rf "$(DEP_DIR)"
+	rm -f "$(OUT)/$(OBJ)"
 
 
 ##### Utilities #####
