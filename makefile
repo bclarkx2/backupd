@@ -6,12 +6,12 @@ CFLAGS=-I .
 
 ##### Objects #####
 
-OBJ = fake
+OBJ = backupd
 
 
 ##### Flags #####
 
-fake: CFLAGS+=-lpthread
+# backupd: CFLAGS+=
 
 
 ##### Dependencies #####
