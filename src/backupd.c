@@ -78,6 +78,10 @@ int main(int arc, char* argv[]){
 
     // Close any inherited file descriptors
 
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+
 
     // Catch signals
  
