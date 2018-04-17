@@ -84,11 +84,18 @@ int main(int arc, char* argv[]){
 
 
     // Catch signals
- 
     // Fork again and let parent terminate
 
+    // Initialization
+    fprintf(f, "Initializing backupd\n");
 
-    printf("I AM DAEMON\n");
 
-    return 0;
+    // Main loop
+    while (1){
+        fprintf(f, "I AM DAEMON\n");
+        fflush(f);
+        sleep(3);
+    }
+
+    exit(SUCCESS);
 }
