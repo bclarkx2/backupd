@@ -18,6 +18,8 @@
 #define FAILURE 1
 #define FORK_FAILURE 2
 #define LOG_OPEN_FAILURE 3
+#define SID_FAILURE 4
+#define CHDIR_FAILURE 5
 
 FILE* f;
 
@@ -75,6 +77,7 @@ int main(int arc, char* argv[]){
         const char* msg = "SID: unable to set unique session id";
         fprintf(stderr, "%s\n", msg);
         fprintf(f, "%s\n", msg);
+        exit(SID_FAILURE);
     }
     printf("SID: set unique session id\n");
 
@@ -86,6 +89,7 @@ int main(int arc, char* argv[]){
         const char* msg = "chdir: unable to change working directory";
         fprintf(stderr, "%s\n", msg);
         fprintf(f, "%s\n", msg);
+        exit(CHDIR_FAILURE);
     }
     printf("chdir: changed working directory\n");
 
