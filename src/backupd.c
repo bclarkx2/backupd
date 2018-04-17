@@ -58,21 +58,31 @@ int main(int arc, char* argv[]){
     pid_t sid;
     sid = setsid();
     if (sid < 0){
-        const char* msg = "SID: unable to set unique session id\n";
-        fprintf(stderr, "%s", msg);
-        fprintf(f, "%s", msg);
+        const char* msg = "SID: unable to set unique session id";
+        fprintf(stderr, "%s\n", msg);
+        fprintf(f, "%s\n", msg);
     }
     printf("SID: set unique session id\n");
 
 
-    // Catch signals
-
-    // Fork again and let parent terminate
-
     // Change daemon's working directory 
- 
+
+    int moved = chdir("/");
+    if (moved < 0){
+        const char* msg = "chdir: unable to change working directory";
+        fprintf(stderr, "%s\n", msg);
+        fprintf(f, "%s\n", msg);
+    }
+    printf("chdir: changed working directory\n");
+
 
     // Close any inherited file descriptors
+
+
+    // Catch signals
+ 
+    // Fork again and let parent terminate
+
 
     printf("I AM DAEMON\n");
 
