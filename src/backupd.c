@@ -9,12 +9,14 @@
 #include <stdio.h>              // I/O
 #include <stdlib.h>             // exit
 #include <sys/types.h>          // pid_t
+#include <sys/stat.h>           // umask
 #include <unistd.h>             // fork
 
 // Error codes
 #define SUCCESS 0
 #define FAILURE 1
 #define FORK_FAILURE 2
+#define LOG_OPEN_FAILURE 3
 
 
 int main(int arc, char* argv[]){
@@ -22,7 +24,7 @@ int main(int arc, char* argv[]){
 
     // Steps
 
-    // Fork parent process
+    // Fork parent process, kill parent
     pid_t pid;
 
     pid = fork();
@@ -38,7 +40,19 @@ int main(int arc, char* argv[]){
 
     printf("Fork successful: continuing with child\n");
 
-    // Terminate parent iff forking was successful
+    // Use umask to acquire appropriate file permissionss
+    // (ex: want to be able to write to logs)
+    umask(0);  // 0 should allow full access to created files
+
+    // Open log files
+    FILE* f;
+    f = fopen("backupd.log", "a+");
+    if (f == NULL){
+        fprintf(stderr, "Log file: cannot open\n");
+        exit(LOG_OPEN_FAILURE);
+    }
+    fprintf(stdout, "Creating log file\n");
+    fprintf(f, "Starting up backupd.\n");
 
     // Use setsid to detach from calling TTY
 
@@ -48,7 +62,6 @@ int main(int arc, char* argv[]){
 
     // Change daemon's working directory 
  
-    // Use umask to acquire appropriate file permissionss
 
     // Close any inherited file descriptors
 
