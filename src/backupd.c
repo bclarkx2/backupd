@@ -55,6 +55,15 @@ int main(int arc, char* argv[]){
     fprintf(f, "Starting up backupd.\n");
 
     // Use setsid to detach from calling TTY
+    pid_t sid;
+    sid = setsid();
+    if (sid < 0){
+        const char* msg = "SID: unable to set unique session id\n";
+        fprintf(stderr, "%s", msg);
+        fprintf(f, "%s", msg);
+    }
+    printf("SID: set unique session id\n");
+
 
     // Catch signals
 
