@@ -6,6 +6,7 @@
  * Description: Linux filesystem monitoring daemon
  */
 
+#include <signal.h>             // signal
 #include <stdio.h>              // I/O
 #include <stdlib.h>             // exit
 #include <sys/types.h>          // pid_t
@@ -18,11 +19,25 @@
 #define FORK_FAILURE 2
 #define LOG_OPEN_FAILURE 3
 
+FILE* f;
+
+void signal_handler(int sig){
+    switch(sig){
+        case SIGHUP:
+            fprintf(f, "SIGHUP received\n");
+            break;
+        case SIGTERM:
+            fprintf(f, "SIGTERM received\n");
+            exit(EXIT_SUCCESS);
+            break;
+        default:
+            fprintf(f, "Strange signal received: %d\n", sig);
+    }
+}
+
 
 int main(int arc, char* argv[]){
 
-
-    // Steps
 
     // Fork parent process, kill parent
     pid_t pid;
@@ -45,7 +60,6 @@ int main(int arc, char* argv[]){
     umask(0);  // 0 should allow full access to created files
 
     // Open log files
-    FILE* f;
     f = fopen("backupd.log", "a+");
     if (f == NULL){
         fprintf(stderr, "Log file: cannot open\n");
@@ -84,7 +98,10 @@ int main(int arc, char* argv[]){
 
 
     // Catch signals
-    // Fork again and let parent terminate
+    signal(SIGCHLD, SIG_IGN);           // ignore dead child
+    signal(SIGHUP, signal_handler);     // hand of interrupt
+    signal(SIGTERM, signal_handler);    //
+
 
     // Initialization
     fprintf(f, "Initializing backupd\n");
