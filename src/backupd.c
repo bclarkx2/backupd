@@ -58,22 +58,12 @@ void daemonize(){
     // (ex: want to be able to write to logs)
     umask(0);  // 0 should allow full access to created files
 
-    // Open log files
-    f = fopen("backupd.log", "a+");
-    if (f == NULL){
-        fprintf(stderr, "Log file: cannot open\n");
-        exit(LOG_OPEN_FAILURE);
-    }
-    fprintf(stdout, "Creating log file\n");
-    fprintf(f, "Starting up backupd.\n");
-
     // Use setsid to detach from calling TTY
     pid_t sid;
     sid = setsid();
     if (sid < 0){
         const char* msg = "SID: unable to set unique session id";
         fprintf(stderr, "%s\n", msg);
-        fprintf(f, "%s\n", msg);
         exit(SID_FAILURE);
     }
     printf("SID: set unique session id\n");
@@ -85,7 +75,6 @@ void daemonize(){
     if (moved < 0){
         const char* msg = "chdir: unable to change working directory";
         fprintf(stderr, "%s\n", msg);
-        fprintf(f, "%s\n", msg);
         exit(CHDIR_FAILURE);
     }
     printf("chdir: changed working directory\n");
@@ -108,6 +97,16 @@ void daemonize(){
 int main(int arc, char* argv[]){
 
     daemonize();
+
+    // Open log files
+    f = fopen("/home/brian/school/338/final/backupd/out/backupd.log", "a+");
+    if (f == NULL){
+        fprintf(stderr, "Log file: cannot open\n");
+        exit(LOG_OPEN_FAILURE);
+    }
+    fprintf(stdout, "Creating log file\n");
+    fprintf(f, "Starting up backupd.\n");
+
 
     // Initialization
     fprintf(f, "Initializing backupd\n");
