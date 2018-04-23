@@ -26,7 +26,7 @@
 
 // Constants
 #define LINE_WIDTH 80
-const char* STRING_CONFIG_FMT = "%*s %s";
+const char* STRING_CONFIG_FMT = "%*s %2000[^\n]%*c";
 
 
 //Globals
