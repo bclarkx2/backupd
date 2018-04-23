@@ -132,8 +132,8 @@ typedef struct config {
 } config;
 
 void str_config(FILE* config_file,
-                     char* str_config,
-                     int length){
+                char* str_config,
+                int length){
     char line[length];
     if (fgets(line, length, config_file) == NULL){
         fprintf(stderr, "Could not read required config line\n");
