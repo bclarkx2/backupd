@@ -7,6 +7,7 @@
  */
 
 #include <signal.h>             // signal
+#include <stdarg.h>             // varargs
 #include <stdio.h>              // I/O
 #include <stdlib.h>             // exit
 #include <sys/types.h>          // pid_t
@@ -21,7 +22,7 @@
 #define SID_FAILURE 4
 #define CHDIR_FAILURE 5
 
-FILE* f;
+FILE* f;                        // Global log file ptr
 
 void signal_handler(int sig){
     switch(sig){
@@ -80,9 +81,6 @@ void daemonize(){
     printf("chdir: changed working directory\n");
 
 
-
-
-
     // Catch signals
     signal(SIGCHLD, SIG_IGN);           // ignore dead child
     signal(SIGHUP, signal_handler);     // hand of interrupt
@@ -99,6 +97,15 @@ void start_log(const char* fp){
     fprintf(f, "Starting up backupd.\n");
 }
 
+void logger(const char* fmt, ...){
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(f, fmt, args);
+    va_end(args);
+    fflush(f);
+}
+
+
 // Close any inherited file descriptors
 void close_fds(){
     close(STDIN_FILENO);
@@ -113,13 +120,12 @@ int main(int arc, char* argv[]){
     close_fds();
 
     // Initialization
-    fprintf(f, "Initializing backupd\n");
+    logger("Initializing backupd\n");
 
 
     // Main loop
     while (1){
-        fprintf(f, "I AM DAEMON\n");
-        fflush(f);
+        logger("I AM DAEMON\n");
         sleep(3);
     }
 
