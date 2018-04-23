@@ -129,6 +129,7 @@ void close_fds(){
 typedef struct config {
     char log_loc[LINE_WIDTH];
     char msg[LINE_WIDTH];
+    char watch_dir[LINE_WIDTH];
 } config;
 
 void str_config(FILE* config_file,
@@ -150,6 +151,7 @@ void read_config(const char* config_loc, config* c){
 
     str_config(config_file, c->log_loc, sizeof(c->log_loc));
     str_config(config_file, c->msg, sizeof(c->msg));
+    str_config(config_file, c->watch_dir, sizeof(c->watch_dir));
 
     fclose(config_file);
 }
@@ -184,7 +186,7 @@ int main(int argc, char* argv[]){
 
     // Initialization
     logger("Initializing backupd\n");
-
+    logger("watch_dir: %s\n", c.watch_dir);
 
     // Main loop
     while (1){
