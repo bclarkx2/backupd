@@ -22,6 +22,7 @@
 #define SID_FAILURE 4
 #define CHDIR_FAILURE 5
 #define CLI_FAILURE 6
+#define CONFIG_FAILURE 7
 
 // Constants
 #define LINE_WIDTH 80
@@ -127,20 +128,31 @@ void close_fds(){
 
 typedef struct config {
     char log_loc[LINE_WIDTH];
+    char msg[LINE_WIDTH];
 } config;
 
+void str_config(FILE* config_file,
+                     char* str_config,
+                     int length){
+    char line[length];
+    if (fgets(line, length, config_file) == NULL){
+        fprintf(stderr, "Could not read required config line\n");
+        exit(CONFIG_FAILURE);
+    }
+    if (sscanf(line, STRING_CONFIG_FMT, str_config) == EOF){
+        fprintf(stderr, "Cound not parse config line\n");
+        exit(CONFIG_FAILURE);
+    }
+}
 
 void read_config(const char* config_loc, config* c){
     FILE* config_file = fopen(config_loc, "r");
 
-    char line[LINE_WIDTH];
-
-    fgets(line, LINE_WIDTH, config_file);
-    sscanf(line, STRING_CONFIG_FMT, c->log_loc);
+    str_config(config_file, c->log_loc, sizeof(c->log_loc));
+    str_config(config_file, c->msg, sizeof(c->msg));
 
     fclose(config_file);
 }
-
 
 
 /******************************************
@@ -176,7 +188,8 @@ int main(int argc, char* argv[]){
 
     // Main loop
     while (1){
-        logger("I AM DAEMON\n");
+        logger(c.msg);
+        logger("\n");
         sleep(3);
     }
 
