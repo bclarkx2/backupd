@@ -23,13 +23,17 @@
 #define CHDIR_FAILURE 5
 #define CLI_FAILURE 6
 
+// Constants
+#define LINE_WIDTH 80
+const char* STRING_CONFIG_FMT = "%*s %s";
+
 
 //Globals
 
 FILE* p_log;                      // Global log file ptr
 
 
-void start_log(const char* fp){
+void start_log(char* fp){
     p_log = fopen(fp, "a+");
     if (p_log == NULL){
         fprintf(stderr, "Log file: cannot open\n");
@@ -117,14 +121,35 @@ void close_fds(){
     close(STDERR_FILENO);
 }
 
+/******************************************
+ * Config
+ */
+
+typedef struct config {
+    char log_loc[LINE_WIDTH];
+} config;
+
+
+void read_config(const char* config_loc, config* c){
+    FILE* config_file = fopen(config_loc, "r");
+
+    char line[LINE_WIDTH];
+
+    fgets(line, LINE_WIDTH, config_file);
+    sscanf(line, STRING_CONFIG_FMT, c->log_loc);
+
+    fclose(config_file);
+}
+
+
 
 /******************************************
  * CLI
  */
-const char* log_location(int argc, char* argv[]){
+const char* config_location(int argc, char* argv[]){
 
     if (argc != 2){
-        fprintf(stderr, "Enter log location as arg\n");
+        fprintf(stderr, "Enter config location as arg\n");
         exit(CLI_FAILURE);
     }
     else{
@@ -135,12 +160,14 @@ const char* log_location(int argc, char* argv[]){
 
 int main(int argc, char* argv[]){
 
-    const char* log_loc = log_location(argc, argv);
+    const char* config_loc = config_location(argc, argv);
 
-    printf("log_loc: %s\n", log_loc);
+    config c;
+    read_config(config_loc, &c);
+
 
     daemonize();
-    start_log(log_loc);
+    start_log(c.log_loc);
     close_fds();
 
     // Initialization
