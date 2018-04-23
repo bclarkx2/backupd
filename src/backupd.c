@@ -11,6 +11,8 @@
 #include <stdio.h>              // I/O
 #include <stdlib.h>             // exit
 #include <sys/types.h>          // pid_t
+#include <sys/inotify.h>        // inotify
+#include <sys/ioctl.h>          // ioctl
 #include <sys/stat.h>           // umask
 #include <unistd.h>             // fork
 
@@ -26,6 +28,7 @@
 
 // Constants
 #define LINE_WIDTH 80
+#define EVENT_SIZE sizeof(struct inotify_event)
 const char* STRING_CONFIG_FMT = "%*s %2000[^\n]%*c";
 
 
@@ -156,6 +159,37 @@ void read_config(const char* config_loc, config* c){
     fclose(config_file);
 }
 
+/******************************************
+ * Events
+ */
+
+void read_events(int fd){
+    // determine number of bytes available
+    unsigned int available_bytes;
+    ioctl(fd, FIONREAD, &available_bytes);
+
+    // if no data available, do nothing
+    if (available_bytes <= 0){
+        return;
+    }
+
+    char event_buffer[available_bytes];
+    read(fd, event_buffer, available_bytes);
+
+    int offset = 0;
+    while (offset < available_bytes){
+
+        char* start = event_buffer + offset;
+        struct inotify_event* event = (struct inotify_event*) start;
+
+        logger("Received event: %d\n", event->wd);
+        logger("File: %s\n", event->name);
+
+        int total_event_size = EVENT_SIZE + event->len;
+        offset += total_event_size;
+    }
+}
+
 
 /******************************************
  * CLI
@@ -186,12 +220,21 @@ int main(int argc, char* argv[]){
 
     // Initialization
     logger("Initializing backupd\n");
-    logger("watch_dir: %s\n", c.watch_dir);
+
+    int inotify_fd = inotify_init();
+    int watch_fd = inotify_add_watch(inotify_fd,
+                                     c.watch_dir,
+                                     IN_CREATE);
+
+    struct inotify_event event;
 
     // Main loop
     while (1){
         logger(c.msg);
         logger("\n");
+
+        read_events(inotify_fd);
+
         sleep(3);
     }
 
