@@ -22,19 +22,38 @@
 #define SID_FAILURE 4
 #define CHDIR_FAILURE 5
 
-FILE* f;                        // Global log file ptr
+FILE* p_log;                      // Global log file ptr
+
+
+void start_log(const char* fp){
+    p_log = fopen(fp, "a+");
+    if (p_log == NULL){
+        fprintf(stderr, "Log file: cannot open\n");
+        exit(LOG_OPEN_FAILURE);
+    }
+    fprintf(stdout, "Creating log file\n");
+    fprintf(p_log, "Starting up backupd.\n");
+}
+
+void logger(const char* fmt, ...){
+    va_list args;
+    va_start(args, fmt);
+    vfprintf(p_log, fmt, args);
+    va_end(args);
+    fflush(p_log);
+}
 
 void signal_handler(int sig){
     switch(sig){
         case SIGHUP:
-            fprintf(f, "SIGHUP received\n");
+            logger("SIGHUP received\n");
             break;
         case SIGTERM:
-            fprintf(f, "SIGTERM received\n");
+            logger("SIGTERM received\n");
             exit(EXIT_SUCCESS);
             break;
         default:
-            fprintf(f, "Strange signal received: %d\n", sig);
+            logger("Strange signal received: %d\n", sig);
     }
 }
 
@@ -86,25 +105,6 @@ void daemonize(){
     signal(SIGHUP, signal_handler);     // hand of interrupt
     signal(SIGTERM, signal_handler);    //
 }
-
-void start_log(const char* fp){
-    f = fopen(fp, "a+");
-    if (f == NULL){
-        fprintf(stderr, "Log file: cannot open\n");
-        exit(LOG_OPEN_FAILURE);
-    }
-    fprintf(stdout, "Creating log file\n");
-    fprintf(f, "Starting up backupd.\n");
-}
-
-void logger(const char* fmt, ...){
-    va_list args;
-    va_start(args, fmt);
-    vfprintf(f, fmt, args);
-    va_end(args);
-    fflush(f);
-}
-
 
 // Close any inherited file descriptors
 void close_fds(){
