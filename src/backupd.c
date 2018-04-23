@@ -80,11 +80,7 @@ void daemonize(){
     printf("chdir: changed working directory\n");
 
 
-    // Close any inherited file descriptors
 
-    close(STDIN_FILENO);
-    close(STDOUT_FILENO);
-    close(STDERR_FILENO);
 
 
     // Catch signals
@@ -93,20 +89,28 @@ void daemonize(){
     signal(SIGTERM, signal_handler);    //
 }
 
-
-int main(int arc, char* argv[]){
-
-    daemonize();
-
-    // Open log files
-    f = fopen("/home/brian/school/338/final/backupd/out/backupd.log", "a+");
+void start_log(const char* fp){
+    f = fopen(fp, "a+");
     if (f == NULL){
         fprintf(stderr, "Log file: cannot open\n");
         exit(LOG_OPEN_FAILURE);
     }
     fprintf(stdout, "Creating log file\n");
     fprintf(f, "Starting up backupd.\n");
+}
 
+// Close any inherited file descriptors
+void close_fds(){
+    close(STDIN_FILENO);
+    close(STDOUT_FILENO);
+    close(STDERR_FILENO);
+}
+
+int main(int arc, char* argv[]){
+
+    daemonize();
+    start_log("/home/brian/school/338/final/backupd/out/backupd.log");
+    close_fds();
 
     // Initialization
     fprintf(f, "Initializing backupd\n");
