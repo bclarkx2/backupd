@@ -37,10 +37,7 @@ void signal_handler(int sig){
     }
 }
 
-
-int main(int arc, char* argv[]){
-
-
+void daemonize(){
     // Fork parent process, kill parent
     pid_t pid;
 
@@ -105,7 +102,12 @@ int main(int arc, char* argv[]){
     signal(SIGCHLD, SIG_IGN);           // ignore dead child
     signal(SIGHUP, signal_handler);     // hand of interrupt
     signal(SIGTERM, signal_handler);    //
+}
 
+
+int main(int arc, char* argv[]){
+
+    daemonize();
 
     // Initialization
     fprintf(f, "Initializing backupd\n");
