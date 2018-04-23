@@ -21,6 +21,10 @@
 #define LOG_OPEN_FAILURE 3
 #define SID_FAILURE 4
 #define CHDIR_FAILURE 5
+#define CLI_FAILURE 6
+
+
+//Globals
 
 FILE* p_log;                      // Global log file ptr
 
@@ -113,10 +117,30 @@ void close_fds(){
     close(STDERR_FILENO);
 }
 
-int main(int arc, char* argv[]){
+
+/******************************************
+ * CLI
+ */
+const char* log_location(int argc, char* argv[]){
+
+    if (argc != 2){
+        fprintf(stderr, "Enter log location as arg\n");
+        exit(CLI_FAILURE);
+    }
+    else{
+        return argv[1];
+    }
+}
+
+
+int main(int argc, char* argv[]){
+
+    const char* log_loc = log_location(argc, argv);
+
+    printf("log_loc: %s\n", log_loc);
 
     daemonize();
-    start_log("/home/brian/school/338/final/backupd/out/backupd.log");
+    start_log(log_loc);
     close_fds();
 
     // Initialization
