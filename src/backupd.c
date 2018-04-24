@@ -6,6 +6,7 @@
  * Description: Linux filesystem monitoring daemon
  */
 
+#include <semaphore.h>          // sem_t
 #include <signal.h>             // signal
 #include <stdarg.h>             // varargs
 #include <stdio.h>              // I/O
@@ -35,6 +36,8 @@ const char* STRING_CONFIG_FMT = "%*s %2000[^\n]%*c";
 //Globals
 
 FILE* p_log;                      // Global log file ptr
+int incident_counter = 0;         // record num instances
+sem_t incident_sem;               // keep incident_counter safe
 
 
 void start_log(char* fp){
@@ -135,6 +138,9 @@ typedef struct config {
     char watch_dir[LINE_WIDTH];
 } config;
 
+// insert target data structure here
+// typdef struct target
+
 void str_config(FILE* config_file,
                 char* str_config,
                 int length){
@@ -189,6 +195,16 @@ void read_events(int fd){
         offset += total_event_size;
     }
 }
+
+// insert event processor here
+// void process_event(struct inotify_event* event,
+//                    target* targ)
+
+// insert record_incident here
+// void record_incident()
+
+// insert backup_action here
+// void backup_action()
 
 
 /******************************************
