@@ -107,7 +107,7 @@ SIGTERM received
 `backupd` has at least the following error codes:
 
 Code | Name | Meaning
--------------------------
+-----|------|------------
 1 | FAILURE | Generic application failure
 2 | FORK_FAILURE | Unable to fork child process during daemonization
 3 | LOG_OPEN_FAILURE | Unable to open custom log file
