@@ -40,6 +40,10 @@ int incident_counter = 0;         // record num instances
 sem_t incident_sem;               // keep incident_counter safe
 
 
+/*****************************
+ * Logging
+ */
+
 void start_log(char* fp){
     p_log = fopen(fp, "a+");
     if (p_log == NULL){
@@ -57,6 +61,11 @@ void logger(const char* fmt, ...){
     va_end(args);
     fflush(p_log);
 }
+
+
+/******************************
+ * Daemon stuff
+ */
 
 void signal_handler(int sig){
     switch(sig){
@@ -128,6 +137,7 @@ void close_fds(){
     close(STDERR_FILENO);
 }
 
+
 /******************************************
  * Config
  */
@@ -164,6 +174,7 @@ void read_config(const char* config_loc, config* c){
 
     fclose(config_file);
 }
+
 
 /******************************************
  * Events
@@ -221,6 +232,10 @@ const char* config_location(int argc, char* argv[]){
     }
 }
 
+
+/******************************************
+ * Main
+ */
 
 int main(int argc, char* argv[]){
 
