@@ -24,12 +24,12 @@ The `backupd` daemon can be started manually via the command line with the follo
 `./backupd config_file`
 
 If you want `backupd` to start automatically on system boot:
-1 Copy the `backupd` executable to `/usr/local/bin`
-2 Copy the `backupd_startup` script to `/etc/init.d/backupd_startup`
-3 Ensure the script is executable (`chmod +x /etc/init.d/backupd_startup`)
-4 Run the command `update-rc.d backupd_startup defaults`
-5 The `backupd` will now start automatically on boot.
-6 Control the daemon with `service backupd ____`
+1. Copy the `backupd` executable to `/usr/local/bin`
+2. Copy the `backupd_startup` script to `/etc/init.d/backupd_startup`
+3. Ensure the script is executable (`chmod +x /etc/init.d/backupd_startup`)
+4. Run the command `update-rc.d backupd_startup defaults`
+5. The `backupd` will now start automatically on boot.
+6. Control the daemon with `service backupd ____`
 
 ## Detailed Design
 
