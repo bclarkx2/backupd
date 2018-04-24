@@ -73,6 +73,35 @@ The `process_event` function is responsible for updating the `incident_counter` 
 
 The `backup_action` function is responsible for invoking whatever shell command is set in the config file. (For testing purposes, this will just be a log message).
 
+## Sample Output
+
+The log file below is the results of running the daemon with the below config file. Note that this config file does not contain all the information the final version will contain.
+
+### Sample Config File
+
+This represents 
+
+```
+log_loc /home/brian/school/338/final/backupd/out/backupd.log
+msg Polling watch dir...
+watch_dir /home/brian/school/338/final/test
+```
+
+### Sample Log File
+```
+Starting up backupd.
+Initializing backupd
+Polling watch dir...
+Polling watch dir...
+Polling watch dir...
+Polling watch dir...
+Received event: 1
+File: new_file
+Polling watch dir...
+Polling watch dir...
+SIGTERM received
+```
+
 ## Failures
 
 `backupd` has at least the following error codes:
