@@ -106,12 +106,12 @@ SIGTERM received
 
 `backupd` has at least the following error codes:
 
-| Code | Name | Meaning |
+Code | Name | Meaning
 -------------------------
-| 1 | FAILURE | Generic application failure |
-| 2 | FORK_FAILURE | Unable to fork child process during daemonization |
-| 3 | LOG_OPEN_FAILURE | Unable to open custom log file |
-| 4 | SID_FAILURE | Unable to set unique session id during daemonization |
-| 5 | CHDIR_FAILURE | Unable to change working directory during daemonization |
-| 6 | CLI_FAILURE | Incorrect command line usage |
-| 7 | CONFIG_FAILURE | Error reading config file |
+1 | FAILURE | Generic application failure
+2 | FORK_FAILURE | Unable to fork child process during daemonization
+3 | LOG_OPEN_FAILURE | Unable to open custom log file
+4 | SID_FAILURE | Unable to set unique session id during daemonization
+5 | CHDIR_FAILURE | Unable to change working directory during daemonization
+6 | CLI_FAILURE | Incorrect command line usage
+7 | CONFIG_FAILURE | Error reading config file
