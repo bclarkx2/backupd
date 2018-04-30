@@ -38,8 +38,24 @@ const char* INT_CFG_FMT = "%*s %d";
 const char* TARGET_CFG_FMT = "%*s %s";
 
 
+// Structures
+typedef struct target {
+    char watch_dir[LINE_WIDTH];
+    uint32_t mask;
+} target;
+
+typedef struct config {
+    char log_loc[LINE_WIDTH];
+    char msg[LINE_WIDTH];
+    int incident_limit;
+    int num_targets;
+    target targets[MAX_TARGETS];
+} config;
+
+
 //Globals
 
+config c;                         // Global config struct
 FILE* p_log;                      // Global log file ptr
 int incident_counter = 0;         // record num instances
 sem_t incident_sem;               // keep incident_counter safe
@@ -168,19 +184,6 @@ void close_fds(){
  * Config
  */
 
-typedef struct target {
-    char watch_dir[LINE_WIDTH];
-    uint32_t mask;
-} target;
-
-typedef struct config {
-    char log_loc[LINE_WIDTH];
-    char msg[LINE_WIDTH];
-    int incident_limit;
-    int num_targets;
-    target targets[MAX_TARGETS];
-} config;
-
 void read_config_line(char* line, int length, FILE* config_file){
     if (fgets(line, length, config_file) == NULL){
         fprintf(stderr, "Could not read required config line\n");
@@ -238,7 +241,12 @@ void read_config(const char* config_loc, config* c){
  * Events
  */
 
-void read_events(int fd){
+void process_event(struct inotify_event* event,
+                   target* targ){
+    logger("File: %s\n", event->name);
+}
+
+void read_events(int fd, target* targ){
     // determine number of bytes available
     unsigned int available_bytes;
     ioctl(fd, FIONREAD, &available_bytes);
@@ -257,7 +265,7 @@ void read_events(int fd){
         char* start = event_buffer + offset;
         struct inotify_event* event = (struct inotify_event*) start;
 
-        logger("File: %s\n", event->name);
+        process_event(event, targ);
 
         int total_event_size = EVENT_SIZE + event->len;
         offset += total_event_size;
@@ -299,7 +307,7 @@ void* target_thread(void* param){
         }
         else{
             logger("Received event in %s\n", targ.watch_dir);
-            read_events(inotify_fd);
+            read_events(inotify_fd, &targ);
         }
 
     }
@@ -314,11 +322,6 @@ pthread_t start_target_thread(target* targ){
 
     return tid;
 }
-
-
-// insert event processor here
-// void process_event(struct inotify_event* event,
-//                    target* targ)
 
 // insert record_incident here
 // void record_incident()
@@ -350,9 +353,7 @@ int main(int argc, char* argv[]){
 
     const char* config_loc = config_location(argc, argv);
 
-    config c;
     read_config(config_loc, &c);
-
 
     daemonize();
     start_log(c.log_loc);
