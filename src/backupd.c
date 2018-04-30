@@ -67,6 +67,27 @@ void logger(const char* fmt, ...){
 
 
 /******************************
+ * Incident counter
+ */
+
+int get_incidents(){
+    return incident_counter;
+}
+
+void reset_incjidents(){
+    sem_wait(&incident_sem);
+    incident_counter = 0;
+    sem_post(&incident_sem);
+}
+
+void increment_incidents(){
+    sem_wait(&incident_sem);
+    incident_counter++;
+    sem_post(&incident_sem);
+}
+
+
+/******************************
  * Daemon stuff
  */
 
