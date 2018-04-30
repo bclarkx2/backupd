@@ -6,6 +6,7 @@
  * Description: Linux filesystem monitoring daemon
  */
 
+#include <pthread.h>            // pthreads
 #include <semaphore.h>          // sem_t
 #include <signal.h>             // signal
 #include <stdarg.h>             // varargs
@@ -224,8 +225,8 @@ void read_config(const char* config_loc, config* c){
     scalar_config(config_f, &(c->num_targets), INT_CFG_FMT, LINE_WIDTH);
 
     for(int target_idx = 0; target_idx < c->num_targets; target_idx++){
-        target conf = c->targets[target_idx];
-        target_config(config_f, &conf, LINE_WIDTH);
+        target* conf = &(c->targets[target_idx]);
+        target_config(config_f, conf, LINE_WIDTH);
     }
 
     fclose(config_f);
@@ -235,6 +236,21 @@ void read_config(const char* config_loc, config* c){
 /******************************************
  * Events
  */
+
+void* target_thread(void* param){
+    target targ = *((target*) param);
+    logger("Starting target thread for dir: %s\n", targ.watch_dir);
+}
+
+pthread_t start_target_thread(target* targ){
+    pthread_t tid;
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+
+    pthread_create(&tid, &attr, target_thread, targ);
+
+    return tid;
+}
 
 void read_events(int fd){
     // determine number of bytes available
@@ -308,10 +324,10 @@ int main(int argc, char* argv[]){
     // Initialization
     logger("Initializing backupd\n");
 
-    // int inotify_fd = inotify_init();
-    // int watch_fd = inotify_add_watch(inotify_fd,
-    //                                  c.watch_dir,
-    //                                  IN_CREATE);
+    for(int targ_idx = 0; targ_idx < c.num_targets; targ_idx++){
+        target* targ = &(c.targets[targ_idx]);
+        pthread_t tid = start_target_thread(targ);
+    }
 
     struct inotify_event event;
 
