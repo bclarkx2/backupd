@@ -341,6 +341,12 @@ pthread_t start_target_thread(target* targ){
     return tid;
 }
 
+void init_target_threads(){
+    for(int targ_idx = 0; targ_idx < c.num_targets; targ_idx++){
+        target* targ = &(c.targets[targ_idx]);
+        pthread_t tid = start_target_thread(targ);
+    }
+}
 
 /******************************************
  * CLI
@@ -375,11 +381,7 @@ int main(int argc, char* argv[]){
     logger("Initializing backupd\n");
 
     init_incident_counter();
-
-    for(int targ_idx = 0; targ_idx < c.num_targets; targ_idx++){
-        target* targ = &(c.targets[targ_idx]);
-        pthread_t tid = start_target_thread(targ);
-    }
+    init_target_threads();
 
     struct inotify_event event;
 
