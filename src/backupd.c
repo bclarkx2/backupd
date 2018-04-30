@@ -341,9 +341,9 @@ pthread_t start_target_thread(target* targ){
     return tid;
 }
 
-void init_target_threads(){
-    for(int targ_idx = 0; targ_idx < c.num_targets; targ_idx++){
-        target* targ = &(c.targets[targ_idx]);
+void init_target_threads(target* targets, int num_targets){
+    for(int targ_idx = 0; targ_idx < num_targets; targ_idx++){
+        target* targ = &(targets[targ_idx]);
         pthread_t tid = start_target_thread(targ);
     }
 }
@@ -381,7 +381,7 @@ int main(int argc, char* argv[]){
     logger("Initializing backupd\n");
 
     init_incident_counter();
-    init_target_threads();
+    init_target_threads(c.targets, c.num_targets);
 
     // Parent is done
     pause();
