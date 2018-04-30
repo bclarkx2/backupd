@@ -21,6 +21,10 @@
 #include <sys/stat.h>           // umask
 #include <unistd.h>             // fork
 
+// BSD source
+#define __USE_BSD
+#define _BSD_SOURCE
+
 // Error codes
 #define SUCCESS 0
 #define FAILURE 1
