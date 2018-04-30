@@ -22,7 +22,7 @@
 #include <unistd.h>             // fork
 
 // BSD source
-#define __USE_BSD
+// #define __USE_BSD
 #define _BSD_SOURCE
 
 // Error codes
