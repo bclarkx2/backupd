@@ -1,7 +1,7 @@
 
 ##### Settings #####
 CC=gcc
-CFLAGS=-I .
+CFLAGS=-I . -std=c99
 OUT=../out
 
 
