@@ -12,7 +12,7 @@ OBJ = backupd
 
 ##### Flags #####
 
-# backupd: CFLAGS+=
+backupd: CFLAGS+=-lpthread
 
 
 ##### Dependencies #####
