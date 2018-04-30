@@ -10,8 +10,10 @@
 #include <semaphore.h>          // sem_t
 #include <signal.h>             // signal
 #include <stdarg.h>             // varargs
+#include <stdbool.h>            // bool
 #include <stdio.h>              // I/O
 #include <stdlib.h>             // exit
+#include <syslog.h>             // syslog
 #include <sys/types.h>          // pid_t
 #include <sys/inotify.h>        // inotify
 #include <sys/ioctl.h>          // ioctl
@@ -36,7 +38,11 @@
 const char* STR_CFG_FMT = "%*s %2000[^\n]%*c";
 const char* INT_CFG_FMT = "%*s %d";
 const char* TARGET_CFG_FMT = "%*s %s";
+const char* BOOL_CFG_FMT = "%*s %d";
 
+const char* SYSLOG_IDENT = "backupd";
+const int SYSLOG_OPTIONS = LOG_CONS | LOG_PID;
+const int SYSLOG_FACILITY = LOG_USER;
 
 // Structures
 typedef struct target {
@@ -47,6 +53,7 @@ typedef struct target {
 typedef struct config {
     char log_loc[LINE_WIDTH];
     char msg[LINE_WIDTH];
+    bool syslogging;
     int incident_limit;
     int num_targets;
     target targets[MAX_TARGETS];
@@ -65,14 +72,26 @@ sem_t incident_sem;               // keep incident_counter safe
  * Logging
  */
 
-void start_log(char* fp){
-    p_log = fopen(fp, "a+");
+void start_custom_log(char* custom_fp){
+    printf("Creating log file: %s\n", custom_fp);
+    p_log = fopen(custom_fp, "a+");
     if (p_log == NULL){
         fprintf(stderr, "Log file: cannot open\n");
         exit(LOG_OPEN_FAILURE);
     }
-    fprintf(stdout, "Creating log file\n");
-    fprintf(p_log, "Starting up backupd.\n");
+}
+
+void start_syslog(){
+    printf("Starting syslog entry with ident: %s\n", SYSLOG_IDENT);
+    openlog(SYSLOG_IDENT, SYSLOG_OPTIONS, SYSLOG_FACILITY);
+}
+
+void start_log(char* custom_fp){
+    start_custom_log(custom_fp);
+    if (c.syslogging){
+        start_syslog();
+        syslog(LOG_INFO, "STARTING BACKUPD\n");
+    }
 }
 
 void logger(const char* fmt, ...){
@@ -81,8 +100,19 @@ void logger(const char* fmt, ...){
     vfprintf(p_log, fmt, args);
     va_end(args);
     fflush(p_log);
+    if(c.syslogging){
+        va_start(args, fmt);
+        vsyslog(LOG_INFO, fmt, args);
+        va_end(args);
+    }
 }
 
+void end_log(){
+    logger("Closing log.\n");
+    fclose(p_log);
+    if(c.syslogging)
+        closelog();
+}
 
 /******************************
  * Incident counter
@@ -117,6 +147,7 @@ void signal_handler(int sig){
             break;
         case SIGTERM:
             logger("SIGTERM received\n");
+            end_log();
             exit(EXIT_SUCCESS);
             break;
         default:
@@ -226,6 +257,8 @@ void read_config(const char* config_loc, config* c){
     scalar_config(config_f, c->log_loc, STR_CFG_FMT, sizeof(c->log_loc));
     scalar_config(config_f, c->msg, STR_CFG_FMT, sizeof(c->msg));
 
+    scalar_config(config_f, &(c->syslogging), BOOL_CFG_FMT, LINE_WIDTH);
+
     scalar_config(config_f, &(c->incident_limit), INT_CFG_FMT, LINE_WIDTH);
     scalar_config(config_f, &(c->num_targets), INT_CFG_FMT, LINE_WIDTH);
 
@@ -248,7 +281,8 @@ void backup_action(){
 
 void process_event(struct inotify_event* event,
                    target* targ){
-    logger("File: %s\n", event->name);
+
+    logger("File: %s/%s\n", targ->watch_dir, event->name);
 
     sem_wait(&incident_sem);
 
