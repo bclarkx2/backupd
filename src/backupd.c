@@ -32,7 +32,7 @@
 #define CONFIG_FAILURE 7
 
 // Constants
-#define LINE_WIDTH 80
+#define LINE_WIDTH 120
 #define EVENT_SIZE sizeof(struct inotify_event)
 #define MAX_TARGETS 10
 const char* STR_CFG_FMT = "%*s %2000[^\n]%*c";
@@ -52,7 +52,7 @@ typedef struct target {
 
 typedef struct config {
     char log_loc[LINE_WIDTH];
-    char msg[LINE_WIDTH];
+    char backup[LINE_WIDTH];
     bool syslogging;
     int incident_limit;
     int num_targets;
@@ -255,7 +255,7 @@ void read_config(const char* config_loc, config* c){
     FILE* config_f = fopen(config_loc, "r");
 
     scalar_config(config_f, c->log_loc, STR_CFG_FMT, sizeof(c->log_loc));
-    scalar_config(config_f, c->msg, STR_CFG_FMT, sizeof(c->msg));
+    scalar_config(config_f, c->backup, STR_CFG_FMT, sizeof(c->backup));
 
     scalar_config(config_f, &(c->syslogging), BOOL_CFG_FMT, LINE_WIDTH);
 
@@ -276,7 +276,8 @@ void read_config(const char* config_loc, config* c){
  */
 
 void backup_action(){
-    logger("Backing up!\n");
+    logger("Calling backup command: %s\n", c.backup);
+    system(c.backup);
 }
 
 void process_event(struct inotify_event* event,
