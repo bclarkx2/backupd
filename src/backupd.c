@@ -74,7 +74,7 @@ int get_incidents(){
     return incident_counter;
 }
 
-void reset_incjidents(){
+void reset_incidents(){
     sem_wait(&incident_sem);
     incident_counter = 0;
     sem_post(&incident_sem);
