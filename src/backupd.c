@@ -15,6 +15,7 @@
 #include <sys/types.h>          // pid_t
 #include <sys/inotify.h>        // inotify
 #include <sys/ioctl.h>          // ioctl
+#include <sys/select.h>         // select
 #include <sys/stat.h>           // umask
 #include <unistd.h>             // fork
 
@@ -256,7 +257,6 @@ void read_events(int fd){
         char* start = event_buffer + offset;
         struct inotify_event* event = (struct inotify_event*) start;
 
-        logger("Received event: %d\n", event->wd);
         logger("File: %s\n", event->name);
 
         int total_event_size = EVENT_SIZE + event->len;
@@ -266,19 +266,42 @@ void read_events(int fd){
 
 void* target_thread(void* param){
     target targ = *((target*) param);
-    logger("Starting target thread for dir: %s\n", targ.watch_dir);
+    logger("Starting target thread: %s\n", targ.watch_dir);
  
     int inotify_fd = inotify_init();
     int watch_fd = inotify_add_watch(inotify_fd,
                                      targ.watch_dir,
                                      targ.mask);
 
+
+    fd_set readfds, writefds, exceptfds;
+    struct timeval tv;
+    int retval;
+
     while (1){
-        logger("dir: %s\n", targ.watch_dir);
 
-        read_events(inotify_fd);
+        FD_ZERO(&writefds);
+        FD_ZERO(&exceptfds);
+        FD_ZERO(&readfds);
+        FD_SET(inotify_fd, &readfds);
 
-        sleep(3);
+        tv.tv_sec = 1000;
+        tv.tv_usec = 0;
+
+        retval = select(MAX_TARGETS,
+                        &readfds,
+                        &writefds,
+                        &exceptfds,
+                        &tv);
+        
+        if (retval < 0){
+            logger("Error reading inotify_fd: %d\n", inotify_fd);
+        }
+        else{
+            logger("Received event in %s\n", targ.watch_dir);
+            read_events(inotify_fd);
+        }
+
     }
 }
 
