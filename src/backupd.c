@@ -30,7 +30,10 @@
 // Constants
 #define LINE_WIDTH 80
 #define EVENT_SIZE sizeof(struct inotify_event)
+#define MAX_TARGETS 10
 const char* STRING_CONFIG_FMT = "%*s %2000[^\n]%*c";
+const char* INT_CONFIG_FMT = "%*s %d";
+const char* TARGET_CONFIG_FMT = "%*s %s";
 
 
 //Globals
@@ -142,25 +145,49 @@ void close_fds(){
  * Config
  */
 
+typedef struct target {
+    char watch_dir[LINE_WIDTH];
+    uint32_t mask;
+} target;
+
 typedef struct config {
     char log_loc[LINE_WIDTH];
     char msg[LINE_WIDTH];
-    char watch_dir[LINE_WIDTH];
+    int num_targets;
+    target targets[MAX_TARGETS];
 } config;
 
-// insert target data structure here
-// typdef struct target
-
-void str_config(FILE* config_file,
-                char* str_config,
-                int length){
-    char line[length];
+void read_config_line(char* line, int length, FILE* config_file){
     if (fgets(line, length, config_file) == NULL){
         fprintf(stderr, "Could not read required config line\n");
         exit(CONFIG_FAILURE);
     }
-    if (sscanf(line, STRING_CONFIG_FMT, str_config) == EOF){
-        fprintf(stderr, "Cound not parse config line\n");
+}
+
+void read_config_val(char* line, const char* fmt, void* config){
+    if (sscanf(line, fmt, config) == EOF){
+        fprintf(stderr, "Cound not parse config line: %s\n", line);
+        exit(CONFIG_FAILURE);
+    }
+}
+
+void scalar_config(FILE* config_file,
+                   void* config,
+                   const char* fmt,
+                   int length){
+    char line[length];
+    read_config_line(line, length, config_file);
+    read_config_val(line, fmt, config);
+}
+
+void target_config(FILE* config_file,
+                   target* target_config,
+                   int length){
+    char line[length];
+    read_config_line(line, length, config_file);
+    target_config->mask = IN_CREATE;
+    if (sscanf(line, TARGET_CONFIG_FMT, target_config->watch_dir) == EOF){
+        fprintf(stderr, "Cound not parse config line: %s\n", line);
         exit(CONFIG_FAILURE);
     }
 }
@@ -168,9 +195,17 @@ void str_config(FILE* config_file,
 void read_config(const char* config_loc, config* c){
     FILE* config_file = fopen(config_loc, "r");
 
-    str_config(config_file, c->log_loc, sizeof(c->log_loc));
-    str_config(config_file, c->msg, sizeof(c->msg));
-    str_config(config_file, c->watch_dir, sizeof(c->watch_dir));
+    scalar_config(config_file, c->log_loc, STRING_CONFIG_FMT, sizeof(c->log_loc));
+    scalar_config(config_file, c->msg, STRING_CONFIG_FMT, sizeof(c->msg));
+
+    scalar_config(config_file, &(c->num_targets), INT_CONFIG_FMT, LINE_WIDTH);
+
+    printf("msg: %s,\t num_targets: %d\n", c->msg, c->num_targets);
+
+    for(int target_idx = 0; target_idx < c->num_targets; target_idx++){
+        target conf = c->targets[target_idx];
+        target_config(config_file, &conf, LINE_WIDTH);
+    }
 
     fclose(config_file);
 }
@@ -252,10 +287,10 @@ int main(int argc, char* argv[]){
     // Initialization
     logger("Initializing backupd\n");
 
-    int inotify_fd = inotify_init();
-    int watch_fd = inotify_add_watch(inotify_fd,
-                                     c.watch_dir,
-                                     IN_CREATE);
+    // int inotify_fd = inotify_init();
+    // int watch_fd = inotify_add_watch(inotify_fd,
+    //                                  c.watch_dir,
+    //                                  IN_CREATE);
 
     struct inotify_event event;
 
@@ -264,7 +299,7 @@ int main(int argc, char* argv[]){
         logger(c.msg);
         logger("\n");
 
-        read_events(inotify_fd);
+        // read_events(inotify_fd);
 
         sleep(3);
     }
