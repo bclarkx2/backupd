@@ -383,17 +383,8 @@ int main(int argc, char* argv[]){
     init_incident_counter();
     init_target_threads();
 
-    struct inotify_event event;
-
-    // Main loop
-    while (1){
-        // logger(c.msg);
-        // logger("\n");
-
-        // read_events(inotify_fd);
-
-        sleep(3);
-    }
+    // Parent is done
+    pause();
 
     exit(SUCCESS);
 }
