@@ -31,9 +31,9 @@
 #define LINE_WIDTH 80
 #define EVENT_SIZE sizeof(struct inotify_event)
 #define MAX_TARGETS 10
-const char* STRING_CONFIG_FMT = "%*s %2000[^\n]%*c";
-const char* INT_CONFIG_FMT = "%*s %d";
-const char* TARGET_CONFIG_FMT = "%*s %s";
+const char* STR_CFG_FMT = "%*s %2000[^\n]%*c";
+const char* INT_CFG_FMT = "%*s %d";
+const char* TARGET_CFG_FMT = "%*s %s";
 
 
 //Globals
@@ -153,6 +153,7 @@ typedef struct target {
 typedef struct config {
     char log_loc[LINE_WIDTH];
     char msg[LINE_WIDTH];
+    int incident_limit;
     int num_targets;
     target targets[MAX_TARGETS];
 } config;
@@ -186,28 +187,27 @@ void target_config(FILE* config_file,
     char line[length];
     read_config_line(line, length, config_file);
     target_config->mask = IN_CREATE;
-    if (sscanf(line, TARGET_CONFIG_FMT, target_config->watch_dir) == EOF){
+    if (sscanf(line, TARGET_CFG_FMT, target_config->watch_dir) == EOF){
         fprintf(stderr, "Cound not parse config line: %s\n", line);
         exit(CONFIG_FAILURE);
     }
 }
 
 void read_config(const char* config_loc, config* c){
-    FILE* config_file = fopen(config_loc, "r");
+    FILE* config_f = fopen(config_loc, "r");
 
-    scalar_config(config_file, c->log_loc, STRING_CONFIG_FMT, sizeof(c->log_loc));
-    scalar_config(config_file, c->msg, STRING_CONFIG_FMT, sizeof(c->msg));
+    scalar_config(config_f, c->log_loc, STR_CFG_FMT, sizeof(c->log_loc));
+    scalar_config(config_f, c->msg, STR_CFG_FMT, sizeof(c->msg));
 
-    scalar_config(config_file, &(c->num_targets), INT_CONFIG_FMT, LINE_WIDTH);
-
-    printf("msg: %s,\t num_targets: %d\n", c->msg, c->num_targets);
+    scalar_config(config_f, &(c->incident_limit), INT_CFG_FMT, LINE_WIDTH);
+    scalar_config(config_f, &(c->num_targets), INT_CFG_FMT, LINE_WIDTH);
 
     for(int target_idx = 0; target_idx < c->num_targets; target_idx++){
         target conf = c->targets[target_idx];
-        target_config(config_file, &conf, LINE_WIDTH);
+        target_config(config_f, &conf, LINE_WIDTH);
     }
 
-    fclose(config_file);
+    fclose(config_f);
 }
 
 
