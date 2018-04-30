@@ -47,15 +47,19 @@ All of the above information is read into the `struct config` data type, using t
 
 Each target is stored in the `struct target` data type. This struct contains all the information required to properly process an event detected in that specific target dir.
 
+For an example config file, see `sample.config`
+
 ### Daemonization
 
 The `daemonize` method transforms the `backupd` process into a full-fledged daemon process. 
 
 ### Logging
 
-`backupd` uses the `start_log` function to initialize its logs, and the `logger` method to record messages to them.
+`backupd` uses the `start_log` function to initialize its logs, and the `logger` method to record messages to them. `end_log` will release any logging resources used.
 
 The daemon uses a global file descriptor, `p_log`, to refer to its custom log file (the location of which is set by the config file.)
+
+If syslogging is enabled, all messages are sent with the identifier "backupd", along with the process ID. All messages have priority LOG_INFO.
 
 ### Signal handling
 
@@ -71,21 +75,11 @@ The `process_event` function is responsible for updating the `incident_counter` 
 
 ### Backup action
 
-The `backup_action` function is responsible for invoking whatever shell command is set in the config file. (For testing purposes, this will just be a log message).
+The `backup_action` function is responsible for invoking whatever shell command is set in the config file. It is advised that this backup command write some sort of results elsewhere in the filesystem, as its progress is not recorded by the backupd daemon itself.
 
 ## Sample Output
 
 The log file below is the results of running the daemon with the below config file. Note that this config file does not contain all the information the final version will contain.
-
-### Sample Config File
-
-This represents 
-
-```
-log_loc /home/brian/school/338/final/backupd/out/backupd.log
-msg Polling watch dir...
-watch_dir /home/brian/school/338/final/test
-```
 
 ### Sample Log File
 ```
