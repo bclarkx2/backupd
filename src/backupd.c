@@ -93,15 +93,16 @@ int get_incidents(){
 }
 
 void reset_incidents(){
-    sem_wait(&incident_sem);
     incident_counter = 0;
-    sem_post(&incident_sem);
 }
 
 void increment_incidents(){
-    sem_wait(&incident_sem);
     incident_counter++;
-    sem_post(&incident_sem);
+}
+
+void init_incident_counter(){
+    sem_init(&incident_sem, 0, 1);
+    reset_incidents();
 }
 
 
@@ -241,9 +242,26 @@ void read_config(const char* config_loc, config* c){
  * Events
  */
 
+void backup_action(){
+    logger("Backing up!\n");
+}
+
 void process_event(struct inotify_event* event,
                    target* targ){
     logger("File: %s\n", event->name);
+
+    sem_wait(&incident_sem);
+
+    increment_incidents();
+    logger("Incident Count: %d\n", get_incidents());
+
+    if(get_incidents() >= c.incident_limit){
+        logger("Reached incident limit! Invoking backup_action.\n");
+        backup_action();
+        reset_incidents();
+    }
+
+    sem_post(&incident_sem);
 }
 
 void read_events(int fd, target* targ){
@@ -323,12 +341,6 @@ pthread_t start_target_thread(target* targ){
     return tid;
 }
 
-// insert record_incident here
-// void record_incident()
-
-// insert backup_action here
-// void backup_action()
-
 
 /******************************************
  * CLI
@@ -361,6 +373,8 @@ int main(int argc, char* argv[]){
 
     // Initialization
     logger("Initializing backupd\n");
+
+    init_incident_counter();
 
     for(int targ_idx = 0; targ_idx < c.num_targets; targ_idx++){
         target* targ = &(c.targets[targ_idx]);
