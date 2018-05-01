@@ -23,6 +23,10 @@ The `backupd` daemon can be started manually via the command line with the follo
 
 `./backupd config_file`
 
+To test, you will need to edit the .config file. The provided `sample.config` is an example config file. Just replace the filepaths with paths that you want on your system.
+
+
+Note: this following section has not been fully implemented
 If you want `backupd` to start automatically on system boot:
 1. Copy the `backupd` executable to `/usr/local/bin`
 2. Copy the `backupd_startup` script to `/etc/init.d/backupd_startup`
@@ -83,17 +87,34 @@ The log file below is the results of running the daemon with the below config fi
 
 ### Sample Log File
 ```
-Starting up backupd.
 Initializing backupd
-Polling watch dir...
-Polling watch dir...
-Polling watch dir...
-Polling watch dir...
-Received event: 1
-File: new_file
-Polling watch dir...
-Polling watch dir...
+Starting target thread: /home/bpc30/test
+Received event in /home/bpc30/test
+File: /home/bpc30/test/file1
+Incident Count: 1
+File: /home/bpc30/test/file2
+Incident Count: 2
+File: /home/bpc30/test/file3
+Incident Count: 3
+File: /home/bpc30/test/file4
+Incident Count: 4
+File: /home/bpc30/test/file5
+Incident Count: 5
+File: /home/bpc30/test/file6
+Incident Count: 6
+File: /home/bpc30/test/file7
+Incident Count: 7
+File: /home/bpc30/test/file8
+Incident Count: 8
+File: /home/bpc30/test/file9
+Incident Count: 9
+File: /home/bpc30/test/file10
+Incident Count: 10
+Reached incident limit! Invoking backup_action.
+Calling backup command: echo "<external update cmd output>" >> /home/bpc30/backupd.log 2>&1
+<external update cmd output>
 SIGTERM received
+Closing log.
 ```
 
 ## Failures
