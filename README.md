@@ -23,8 +23,9 @@ The `backupd` daemon can be started manually via the command line with the follo
 
 `./backupd config_file`
 
-To test, you will need to edit the .config file. The provided `sample.config` is an example config file. Just replace the filepaths with paths that you want on your system.
+To test, you will need to edit the .config file. The provided `sample.config` is an example config file. Just replace the filepaths with paths that you want on your system. (Note: the target directories must already exist).
 
+Then, create files in the directories you set a target on. Each created file should show up as an event on the log. When the incident limit is reached, the backup command you specified in the config file will execute.
 
 Note: this following section has not been fully implemented
 If you want `backupd` to start automatically on system boot:
