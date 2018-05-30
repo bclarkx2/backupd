@@ -419,7 +419,7 @@ int main(int argc, char* argv[]){
     read_config(config_loc, &c);
 
     daemonize();
-    write_pid("/tmp/backupd_pid");
+    write_pid("/tmp/backupd.pid");
     start_log(c.log_loc);
     close_fds();
 
