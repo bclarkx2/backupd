@@ -208,6 +208,12 @@ void daemonize(){
     signal(SIGTERM, signal_handler);    //
 }
 
+void write_pid(const char* pidfile){
+    FILE* f = fopen(pidfile, "w");
+    fprintf(f, "%d", getpid());
+    fclose(f);
+}
+
 // Close any inherited file descriptors
 void close_fds(){
     close(STDIN_FILENO);
@@ -413,6 +419,7 @@ int main(int argc, char* argv[]){
     read_config(config_loc, &c);
 
     daemonize();
+    write_pid("/tmp/backupd_pid");
     start_log(c.log_loc);
     close_fds();
 
