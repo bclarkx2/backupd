@@ -1,0 +1,12 @@
+[Unit]
+Description=backupd daemon
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/backupd.sh start
+ExecStop=/usr/local/bin/backupd.sh stop
+ExecReload=/usr/local/bin/backupd.sh reload
+PIDFile=/tmp/backupd.pid
+
+[Install]
+WantedBy=multi-user.target

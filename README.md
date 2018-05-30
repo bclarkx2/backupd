@@ -27,14 +27,17 @@ To test, you will need to edit the .config file. The provided `sample.config` is
 
 Then, create files in the directories you set a target on. Each created file should show up as an event on the log. When the incident limit is reached, the backup command you specified in the config file will execute.
 
-Note: this following section has not been fully implemented
-If you want `backupd` to start automatically on system boot:
-1. Copy the `backupd` executable to `/usr/local/bin`
-2. Copy the `backupd_startup` script to `/etc/init.d/backupd_startup`
-3. Ensure the script is executable (`chmod +x /etc/init.d/backupd_startup`)
-4. Run the command `update-rc.d backupd_startup defaults`
-5. The `backupd` will now start automatically on boot.
-6. Control the daemon with `service backupd ____`
+`backupd` may be installed as a systemd unit. This will allow the daemon to start on system boot, as well as give you control over the daemon's behavior using systemctl. Follow these steps to install the `backupd` systemd unit. Note: This will require admin privileges.
+
+1. `cd setup`
+2. `./setup.sh config_file`
+
+config_file is a filepath pointing to the location of the `backupd` config file. Note that if you change the location of this config file, you will need to reinstall `backupd` using this same setup procedure. If you just want to make changes to the config file, the following command will load those changes:
+
+`systemctl reload backupd`
+
+To uninstall the `backupd` systemd unit, run the `remove.sh` script in the setup/ directory.
+
 
 ## Detailed Design
 
